@@ -1,30 +1,16 @@
-import AdminRoute from "@/context/AdminRoute";
 import PrivateRoute from "@/context/PrivateRoute";
-import AboutPage from "@/Page/AboutPage";
-import BiodataDetailsPage from "@/Page/BiodataDetailsPage";
+import About from "@/Page/About";
+import AddTask from "@/Page/AddTask";
 import ContactPage from "@/Page/ContactPage";
-import ApprovedContactRequest from "@/Page/Dashboard/AdminHome/ApprovedContactRequest";
-import CheckoutPage from "@/Page/Dashboard/Payment/CheckoutPage";
-import PaymentHistory from "@/Page/Dashboard/Payment/PaymentHistory";
-import EditBiodataPage from "@/Page/Dashboard/UserHome/EditBiodataPage";
-import MyContactRequestPage from "@/Page/Dashboard/UserHome/MyContactRequestPage";
-import MyFavouritesPage from "@/Page/Dashboard/UserHome/MyFavouritesPage";
-import ViewBiodataPage from "@/Page/Dashboard/UserHome/ViewBiodataPage";
-import MembershipPlansPage from "@/Page/MembershipPlansPage";
-import UpcomingPage from "@/Page/UpcomingPage";
+import LoginPage from "@/Page/LoginPage";
+import Register from "@/Page/Register";
+import Tasks from "@/Page/Tasks";
+import TasksUpdate from "@/Page/TasksUpdate";
 import { createBrowserRouter } from "react-router-dom";
-import GotMarried from "../Page/Dashboard/UserHome/GotMarried";
-import UserHome from "../Page/Dashboard/UserHome/UserHome";
-import Dashboard from "./../layouts/Dashboard";
-import MainLayout from "./../layouts/MainLayout";
-import AppSidebar from "./../Page/Biodata/appSidebar";
-import AdminHome from "./../Page/Dashboard/AdminHome/AdminHome";
-import ApprovedPremium from "./../Page/Dashboard/AdminHome/ApprovedPremium";
-import ManageUsers from "./../Page/Dashboard/AdminHome/ManageUsers";
-import ErrorPage from "./../Page/ErrorPage";
-import Home from "./../Page/Home";
-import LoginPage from "./../Page/LoginPage";
-import Register from "./../Page/Register";
+import MainLayout from "../layouts/MainLayout";
+import ErrorPage from "../Page/ErrorPage";
+import Home from "../Page/Home";
+
 
 const router = createBrowserRouter(
   [
@@ -38,137 +24,41 @@ const router = createBrowserRouter(
           element: <Home />,
         },
         {
-          path: "/about-us",
-          element: <AboutPage />,
+          path: "addtask",
+          element: <AddTask />,
         },
         {
-          path: "/contact-us",
+          path: "tasks",
+          element: <Tasks />,
+        },
+        {
+          path: "/tasks/update/:id",
+          element: (
+            <PrivateRoute>
+              <TasksUpdate />
+            </PrivateRoute>
+          ),
+        },
+        {
+          path: "contact",
           element: <ContactPage />,
         },
         {
-          path: "/biodatas",
-          element: <AppSidebar />,
-        },
-        {
-          path: "/biodata-details/:biodataId",
-          element: (
-            <PrivateRoute>
-              <BiodataDetailsPage />
-            </PrivateRoute>
-          ),
-          loader: ({ params }) =>
-            fetch(
-              `https://matrimony-nexus-server.vercel.app/biodatas/${params.biodataId}`
-            ),
+          path: "about-us",
+          element: <About />,
         },
         {
           path: "/login",
           element: <LoginPage />,
         },
         {
-          path: "/membership-plans-page",
-          element:
-            <PrivateRoute>
-              <MembershipPlansPage />
-            </PrivateRoute>
-        },
-        {
           path: "/register",
           element: <Register />,
         },
-        {
-          path: "/up-coming-page",
-          element: <UpcomingPage />,
-        },
-        {
-          path: "/checkout/:biodataId",
-          element: (
-            <PrivateRoute>
-              <CheckoutPage />
-            </PrivateRoute>
-          ),
-          loader: ({ params }) =>
-            fetch(
-              `https://matrimony-nexus-server.vercel.app/biodatas/${params.biodataId}`
-            ),
-        },
-      ],
-    },
-    {
-      path: "dashboard",
-      element: (
-        <PrivateRoute>
-          <Dashboard />
-        </PrivateRoute>
-      ),
-      errorElement: <ErrorPage />,
-      children: [
-        {
-          path: "userHome",
-          element: <UserHome />,
-        },
-        {
-          path: "editBiodata",
-          element: <EditBiodataPage />,
-        },
-        {
-          path: "viewBiodata",
-          element: <ViewBiodataPage />,
-        },
-        {
-          path: "myContactRequests",
-          element: <MyContactRequestPage />,
-        },
-        {
-          path: "favouritesBiodata",
-          element: <MyFavouritesPage />,
-          loader: () =>
-            fetch("https://matrimony-nexus-server.vercel.app/biodatas"),
-        },
-        {
-          path: "paymentHistory",
-          element: <PaymentHistory />,
-        },
-        {
-          path: "GotMarried",
-          element: <GotMarried />,
-        },
-        // admin Route
-        {
-          path: "adminHome",
-          element: (
-            <AdminRoute>
-              <AdminHome />
-            </AdminRoute>
-          ),
-        },
-        {
-          path: "manageUsers",
-          element: (
-            <AdminRoute>
-              <ManageUsers />
-            </AdminRoute>
-          ),
-        },
-        {
-          path: "approvedPremium",
 
-          element: (
-            <AdminRoute>
-              <ApprovedPremium />
-            </AdminRoute>
-          ),
-        },
-        {
-          path: "approvedContactRequests",
-          element: (
-            <AdminRoute>
-              <ApprovedContactRequest />
-            </AdminRoute>
-          ),
-        },
-      ],
+      ]
     },
+
   ],
   {
     future: {

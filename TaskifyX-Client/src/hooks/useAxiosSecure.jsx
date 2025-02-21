@@ -6,7 +6,7 @@ import { useContext } from "react";
 
 // https://matrimony-nexus-server.vercel.app
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "https://taskify-x-server.vercel.app",
 });
 const useAxiosSecure = () => {
   const navigate = useNavigate();
