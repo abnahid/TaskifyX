@@ -23,7 +23,6 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server
-    await client.connect();
 
     const tasksCollection = client
       .db("tasks")
@@ -108,9 +107,7 @@ async function run() {
       res.json({ message: 'Task deleted' });
     });
 
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
   }
