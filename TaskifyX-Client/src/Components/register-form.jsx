@@ -84,7 +84,7 @@ export function RegisterForm({ className, ...props }) {
     const password = form.get("password");
 
     if (name.length < 5) {
-      setError({ ...error, name: "Name should be more than 5 characters" });
+      toast.error("Name should be more than 5 characters");
       return;
     }
 
@@ -93,7 +93,16 @@ export function RegisterForm({ className, ...props }) {
       return;
     }
 
-    if (calculateStrength.score < 4) {
+    if (!email || !password) {
+      toast.error("Email and password are required");
+      return;
+    }
+
+    const passwordStrengthScore = PASSWORD_REQUIREMENTS.filter((req) =>
+      req.regex.test(password)
+    ).length;
+
+    if (passwordStrengthScore < 4) {
       toast.error("Password does not meet complexity requirements");
       return;
     }
@@ -101,10 +110,10 @@ export function RegisterForm({ className, ...props }) {
     createUser(email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        setUser(user);
 
         updateUserProfile(name, photoUrl)
           .then(() => {
+            setUser(user);
             const userInfo = {
               name,
               email,
@@ -118,8 +127,11 @@ export function RegisterForm({ className, ...props }) {
                   title: "User created successfully.",
                   showConfirmButton: false,
                   timer: 1500,
+                }).then(() => {
+                  navigate("/");
                 });
-                navigate(location?.state?.from || "/dashboard");
+              } else {
+                toast.error("Failed to create user. Try again.");
               }
             });
           })

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { AuthContext } from "@/context/AuthProvider";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { useQuery } from "@tanstack/react-query";
@@ -13,18 +14,23 @@ import Swal from "sweetalert2";
 
 const Tasks = () => {
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext);
+    const { user, loading } = useContext(AuthContext); // Use loading from AuthContext
+    const [localTasks, setLocalTasks] = useState([]);
 
     const { data: tasks = [], refetch } = useQuery({
-        queryKey: ["tasks"],
+        queryKey: ["tasks", user?.email],
+        enabled: !!user?.email, // Ensure API call only happens when user email exists
         queryFn: async () => {
             const res = await axios.get(`https://taskify-x-server.vercel.app/tasks/${user?.email}`);
             return res.data;
         },
     });
 
-    const [localTasks, setLocalTasks] = useState([]);
-    useEffect(() => { setLocalTasks(tasks); }, [tasks]);
+    useEffect(() => {
+        if (tasks.length !== localTasks.length) {
+            setLocalTasks(tasks);
+        }
+    }, [tasks]);
 
     const handleUpdate = (taskId) => navigate(`/tasks/update/${taskId}`);
 
@@ -59,7 +65,7 @@ const Tasks = () => {
         setLocalTasks(updatedTasks);
 
         try {
-            await axios.put(`${import.meta.env.VITE_URL}/tasks/${result.draggableId}`, { category: result.destination.droppableId });
+            await axios.put(`https://taskify-x-server.vercel.app/tasks/${result.draggableId}`, { category: result.destination.droppableId });
             refetch();
         } catch (error) {
             console.error("Error updating task category:", error);
@@ -74,53 +80,58 @@ const Tasks = () => {
 
     return (
         <div className="bg-white dark:bg-gray-900">
-
             <div className="min-h-screen w-11/12 mx-auto py-10 max-w-7xl">
                 <h2 className="text-3xl font-bold py-10 text-center flex items-center justify-center gap-2 text-gray-800 dark:text-gray-100 animate-pulse">
                     <FaTasks /> Task Board
                 </h2>
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        {categories.map((column) => (
-                            <Droppable key={column.name} droppableId={column.name}>
-                                {(provided) => (
-                                    <div ref={provided.innerRef} {...provided.droppableProps} className={`${column.bgClass} p-5 rounded-lg min-h-96 shadow-2xl relative overflow-hidden`}>
-                                        <h2 className={`text-xl font-bold mb-3 flex items-center justify-center gap-2 ${column.id === 2 ? "text-blue-600" : ""} ${column.id === 3 ? "text-green-700" : ""}`}>
-                                            {column.icon} {column.name}
-                                        </h2>
-                                        {localTasks.filter((task) => task.category === column.name).map((task, index) => (
-                                            <Draggable key={task._id} draggableId={task._id} index={index}>
-                                                {(provided) => (
-                                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="bg-blue-100 dark:bg-green-900 border-l-4 border-violet-500 dark:border-green-700 text-green-900 dark:text-green-100 p-2 rounded-lg flex items-center justify-between transition duration-300 ease-in-out hover:bg-blue-200 dark:hover:bg-green-800 transform hover:scale-105 mt-6">
-                                                        <div>
-                                                            <h3 className="font-semibold text-base text-gray-800 uppercase dark:text-gray-100">{task.title}</h3>
-                                                            <p className="text-gray-600 text-sm mb-3 dark:text-gray-300">{task.description}</p>
-                                                            <p className="text-gray-600 mb-3 text-xs flex items-center gap-1 dark:text-gray-400">
-                                                                <CiTimer className="text-sm" /> {new Date(task.dueDate).toLocaleString()}
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex flex-col items-center gap-1">
-                                                            <button className="btn btn-sm btn-primary rounded-xl text-white" onClick={() => handleUpdate(task._id)}>
-                                                                <FiEdit />
-                                                            </button>
-                                                            <button onClick={() => handleDelete(task._id)} className="btn btn-sm btn-danger rounded-xl text-white">
-                                                                🗑
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
-                        ))}
+
+                {loading ? (
+                    <div className="flex justify-center items-center min-h-[50vh]">
+                        <div className="text-2xl font-semibold text-gray-700 dark:text-gray-200 animate-pulse">Loading tasks...</div>
                     </div>
-                </DragDropContext>
+                ) : (
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            {categories.map((column) => (
+                                <Droppable key={column.name} droppableId={column.name}>
+                                    {(provided) => (
+                                        <div ref={provided.innerRef} {...provided.droppableProps} className={`${column.bgClass} p-5 rounded-lg min-h-96 shadow-2xl relative overflow-hidden`}>
+                                            <h2 className={`text-xl font-bold mb-3 flex items-center justify-center gap-2 ${column.id === 2 ? "text-blue-600" : ""} ${column.id === 3 ? "text-green-700" : ""}`}>
+                                                {column.icon} {column.name}
+                                            </h2>
+                                            {localTasks.filter((task) => task.category === column.name).map((task, index) => (
+                                                <Draggable key={task._id} draggableId={task._id} index={index}>
+                                                    {(provided) => (
+                                                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="bg-blue-100 dark:bg-green-900 border-l-4 border-violet-500 dark:border-green-700 text-green-900 dark:text-green-100 p-2 rounded-lg flex items-center justify-between transition duration-300 ease-in-out hover:bg-blue-200 dark:hover:bg-green-800 transform hover:scale-105 mt-6">
+                                                            <div>
+                                                                <h3 className="font-semibold text-base text-gray-800 uppercase dark:text-gray-100">{task.title}</h3>
+                                                                <p className="text-gray-600 text-sm mb-3 dark:text-gray-300">{task.description}</p>
+                                                                <p className="text-gray-600 mb-3 text-xs flex items-center gap-1 dark:text-gray-400">
+                                                                    <CiTimer className="text-sm" /> {new Date(task.dueDate).toLocaleString()}
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <button className="btn btn-sm btn-primary rounded-xl text-white" onClick={() => handleUpdate(task._id)}>
+                                                                    <FiEdit />
+                                                                </button>
+                                                                <button onClick={() => handleDelete(task._id)} className="btn btn-sm btn-danger rounded-xl text-white">
+                                                                    🗑
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </Draggable>
+                                            ))}
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            ))}
+                        </div>
+                    </DragDropContext>
+                )}
             </div>
         </div>
-
     );
 };
 

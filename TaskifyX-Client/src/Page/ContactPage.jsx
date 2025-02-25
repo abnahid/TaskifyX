@@ -21,17 +21,18 @@ const ContactPage = () => {
                                 href="mailto:support@matrimonynexus.com"
                                 className="text-BgPrimary dark:text-BgPrimary"
                             >
-                                support@matrimonynexus.com
+                                support@taskifyx.com
                             </a>
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
                             Phone:{" "}
                             <a href="tel:+880123456789" className="text-BgPrimary dark:text-BgPrimary">
-                                +880-123-456-789
+                                +1 (123) 456-7890
                             </a>
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">
-                            Address: Dhaka, Bangladesh
+                            Address: 123 Productivity St,
+                            Silicon Valley, USA
                         </p>
                         <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-2">
                             Follow Us

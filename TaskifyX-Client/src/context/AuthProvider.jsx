@@ -49,25 +49,33 @@ const AuthProvider = ({ children }) => {
 
     // Observer
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
-
-            const userInfo = {
-                userId: currentUser?.uid,
-                name: currentUser?.displayName,
-                email: currentUser?.email,
-
-            };
-            console.log(userInfo);
-            axios.post(`https://taskify-x-server.vercel.app/users`, userInfo)
-                .then(res => {
-                    console.log("User saved:", res.data);
-                })
             setLoading(false);
+
+            if (currentUser) {
+                const userInfo = {
+                    userId: currentUser.uid,
+                    name: currentUser.displayName,
+                    email: currentUser.email,
+                };
+
+                try {
+                    await axios.post("https://taskify-x-server.vercel.app/users", userInfo, {
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    console.log("User saved successfully!");
+                } catch (err) {
+                    if (err.response && err.response.status === 409) {
+                        console.warn("User already exists. No need to add again.");
+                    } else {
+                        console.error("Error saving user:", err);
+                    }
+                }
+            }
         });
-        return () => {
-            return unsubscribe();
-        };
+
+        return () => unsubscribe();
     }, []);
 
     const authInfo = {
@@ -86,5 +94,7 @@ const AuthProvider = ({ children }) => {
         <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
     );
 };
+
+
 
 export default AuthProvider;

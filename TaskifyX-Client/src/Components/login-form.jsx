@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +25,7 @@ export function LoginForm({ className, ...props }) {
     googleLogin()
       .then((result) => {
         const user = result.user;
-        navigate(location?.state?.from || "/dashboard");
+        navigate(location?.state?.from || "/");
       })
       .catch((error) => toast.error(`Google Login Failed: ${error.message}`));
   };
@@ -47,7 +47,7 @@ export function LoginForm({ className, ...props }) {
         toast.success(`User Login successfully: ${user.email}`);
         e.target.reset();
         setUser(user);
-        navigate(location?.state?.from || "/dashboard");
+        navigate(location?.state?.from || "/");
       })
       .catch((error) => {
         toast.error(`Error: ${error.message}`);
