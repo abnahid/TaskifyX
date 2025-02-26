@@ -93,11 +93,6 @@ export function RegisterForm({ className, ...props }) {
       return;
     }
 
-    if (!email || !password) {
-      toast.error("Email and password are required");
-      return;
-    }
-
     const passwordStrengthScore = PASSWORD_REQUIREMENTS.filter((req) =>
       req.regex.test(password)
     ).length;
@@ -107,44 +102,58 @@ export function RegisterForm({ className, ...props }) {
       return;
     }
 
-    createUser(email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-
-        updateUserProfile(name, photoUrl)
-          .then(() => {
-            setUser(user);
-            const userInfo = {
-              name,
-              email,
-            };
-
-            axiosPublic.post("/users", userInfo).then((res) => {
-              if (res.data.insertedId) {
-                Swal.fire({
-                  position: "center",
-                  icon: "success",
-                  title: "User created successfully.",
-                  showConfirmButton: false,
-                  timer: 1500,
-                }).then(() => {
-                  navigate("/");
-                });
-              } else {
-                toast.error("Failed to create user. Try again.");
-              }
-            });
-          })
-          .catch((err) => {
-            console.error(err);
-            toast.error(`Error updating profile: ${err.message}`);
-          });
+    // Check if the user already exists
+    axiosPublic
+      .get(`/users/${email}`)
+      .then((res) => {
+        toast.error("User already exists. Try logging in.");
+        navigate("/");
       })
-      .catch((err) => {
-        console.error(err);
-        toast.error(`Error creating user: ${err.message}`);
+      .catch((error) => {
+        if (error.response && error.response.status === 404) {
+          // Proceed only if user is not found (404)
+          createUser(email, password)
+            .then((userCredential) => {
+              const user = userCredential.user;
+              updateUserProfile(name, photoUrl)
+                .then(() => {
+                  setUser(user);
+                  const userInfo = { name, email };
+
+                  // Create the user in the backend
+                  axiosPublic
+                    .post("/users", userInfo)
+                    .then((res) => {
+                      if (res.data.insertedId) {
+                        Swal.fire({
+                          position: "center",
+                          icon: "success",
+                          title: "User created successfully.",
+                          showConfirmButton: false,
+                          timer: 1500,
+                        }).then(() => {
+                          navigate("/");
+                        });
+                      } else {
+                        toast.error("Failed to create user. Try again.");
+                      }
+                    })
+                    .catch((err) => {
+                      toast.error(`Error creating user: ${err.message}`);
+                    });
+                })
+                .catch((err) => {
+                  toast.error(`Error updating profile: ${err.message}`);
+                });
+            })
+            .catch((err) => {
+              toast.error(`Error creating user: ${err.message}`);
+            });
+        }
       });
   };
+
+
 
   return (
     <form
@@ -167,9 +176,7 @@ export function RegisterForm({ className, ...props }) {
             placeholder="Enter user name"
             required
           />
-          {error.name && (
-            <label className="label text-sm text-red-500">{error.name}</label>
-          )}
+
         </div>
         <div className="grid gap-2">
           <Label htmlFor="photoUrl">Photo URL</Label>

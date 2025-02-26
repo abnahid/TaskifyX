@@ -5,7 +5,12 @@ require("dotenv").config();
 
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://taskifyx.netlify.app"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -38,10 +43,25 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
+
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+
+      // Find user by email
+      const user = await userCollection.findOne({ email });
+
+      if (user) {
+        return res.status(200).send(user);
+      } else {
+        return res.status(404).send({ message: "User not found." });
+      }
+    });
+
 
     // CARD
     app.get("/tasks/:email", async (req, res) => {
@@ -55,6 +75,11 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await tasksCollection.findOne(query);
+
+      if (!result) {
+        return res.status(404).send({ message: "Task not found" });
+      }
+
       res.send(result);
     });
 
@@ -80,32 +105,33 @@ async function run() {
       const { id } = req.params;
       const updateData = req.body;
 
-
       const result = await tasksCollection.updateOne(
         { _id: new ObjectId(id) },
         { $set: updateData }
       );
+
       if (result.matchedCount === 0) {
         return res.status(404).json({ message: 'Task not found' });
       }
-      res.json({ message: 'Task updated successfully' });
 
+      res.json({ message: 'Task updated successfully' });
     });
+
 
     // Delete a task
-    app.delete('/tasks/:id', async (req, res) => {
-      const { id } = req.params;
-
-      const result = await tasksCollection.deleteOne({
-        _id: new MongoClient.ObjectId(id),
-      });
+    app.delete('/task/:id', async (req, res) => {
+      const id = req.params.id;
+      const objectId = new ObjectId(id);
+      const result = await tasksCollection.deleteOne({ _id: objectId });
 
       if (result.deletedCount === 0) {
-        return res.status(404).json({ message: 'Task not found' });
+        return res.status(404).json({ message: "Task not found" });
       }
 
-      res.json({ message: 'Task deleted' });
+      // Return deletedCount for frontend check
+      res.json({ deletedCount: result.deletedCount, message: "Task deleted successfully" });
     });
+
 
 
   } catch (error) {

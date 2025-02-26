@@ -11,6 +11,7 @@ import {
     updateProfile,
 } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { auth } from "../firebase/firebase.init";
 
 export const AuthContext = createContext(null);
@@ -61,10 +62,11 @@ const AuthProvider = ({ children }) => {
                 };
 
                 try {
-                    await axios.post("https://taskify-x-server.vercel.app/users", userInfo, {
+                    await axios.post("http://localhost:5000/users", userInfo, {
                         headers: { "Content-Type": "application/json" }
                     });
                     console.log("User saved successfully!");
+                    Navigate("/");
                 } catch (err) {
                     if (err.response && err.response.status === 409) {
                         console.warn("User already exists. No need to add again.");
