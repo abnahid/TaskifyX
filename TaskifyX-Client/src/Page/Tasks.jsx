@@ -1,3 +1,4 @@
+
 /* eslint-disable no-unused-vars */
 
 import { AuthContext } from "@/context/AuthProvider";
@@ -9,8 +10,10 @@ import { CiBoxList, CiTimer } from "react-icons/ci";
 import { FaTasks } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
+import { MdDeleteForever } from "react-icons/md";
 import { TbProgress } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
+
 import Swal from "sweetalert2";
 
 const Tasks = () => {
@@ -22,7 +25,7 @@ const Tasks = () => {
         queryKey: ["tasks", user?.email],
         enabled: !!user?.email,
         queryFn: async () => {
-            const res = await axios.get(`http://localhost:5000/tasks/${user?.email}`);
+            const res = await axios.get(`https://taskify-x-server.vercel.app/tasks/${user?.email}`);
             return res.data;
         },
     });
@@ -49,7 +52,7 @@ const Tasks = () => {
                 setLocalTasks((prev) => prev.filter((task) => task._id !== taskId));
 
                 try {
-                    const res = await axios.delete(`http://localhost:5000/task/${taskId}`);
+                    const res = await axios.delete(`https://taskify-x-server.vercel.app/task/${taskId}`);
                     if (res.data.deletedCount > 0) {
                         Swal.fire("Deleted!", "Your task has been deleted.", "success");
                         refetch();
@@ -77,7 +80,7 @@ const Tasks = () => {
         setLocalTasks(updatedTasks);
 
         try {
-            const response = await axios.put(`http://localhost:5000/tasks/${result.draggableId}`, {
+            const response = await axios.put(`https://taskify-x-server.vercel.app/tasks/${result.draggableId}`, {
                 category: result.destination.droppableId,
             });
 
@@ -128,7 +131,12 @@ const Tasks = () => {
                                                                 ref={provided.innerRef}
                                                                 {...provided.draggableProps}
                                                                 {...provided.dragHandleProps}
-                                                                className="bg-blue-100 dark:bg-green-900 border-l-4 border-violet-500 dark:border-green-700 text-green-900 dark:text-green-100 p-2 rounded-lg flex items-center justify-between transition duration-300 ease-in-out hover:bg-blue-200 dark:hover:bg-green-800 transform hover:scale-105 mt-6"
+                                                                className={`${task.category === "In Progress"
+                                                                        ? "bg-blue-200"
+                                                                        : task.category === "Done"
+                                                                            ? "bg-green-200"
+                                                                            : "bg-gray-200"
+                                                                    } bg-blue-100 dark:bg-green-900 border-l-4 border-violet-500 dark:border-green-700 text-green-900 dark:text-green-100 p-2 rounded-lg flex items-center justify-between transition duration-300 ease-in-out hover:bg-blue-200 dark:hover:bg-green-800 transform hover:scale-105 mt-6`}
                                                             >
                                                                 <div>
                                                                     <h3 className="font-semibold text-base text-gray-800 uppercase dark:text-gray-100">{task.title}</h3>
@@ -141,8 +149,8 @@ const Tasks = () => {
                                                                     <button className="btn btn-sm btn-primary rounded-xl text-white" onClick={() => handleUpdate(task._id)}>
                                                                         <FiEdit />
                                                                     </button>
-                                                                    <button onClick={() => handleDelete(task._id)} className="btn btn-sm btn-danger rounded-xl text-white">
-                                                                        🗑
+                                                                    <button onClick={() => handleDelete(task._id)} className="btn btn-sm btn-danger rounded-xl text-error">
+                                                                        <MdDeleteForever />
                                                                     </button>
                                                                 </div>
                                                             </div>

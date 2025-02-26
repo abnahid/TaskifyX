@@ -1,6 +1,5 @@
 
 /* eslint-disable react-refresh/only-export-components */
-import axios from "axios";
 import {
     createUserWithEmailAndPassword,
     GoogleAuthProvider,
@@ -11,7 +10,6 @@ import {
     updateProfile,
 } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
 import { auth } from "../firebase/firebase.init";
 
 export const AuthContext = createContext(null);
@@ -45,40 +43,21 @@ const AuthProvider = ({ children }) => {
         return updateProfile(auth.currentUser, {
             displayName: name,
             photoURL: photo,
+
         });
     };
+    // console.log('AuthProvider.jsx', user);
+
 
     // Observer
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setLoading(false);
-
-            if (currentUser) {
-                const userInfo = {
-                    userId: currentUser.uid,
-                    name: currentUser.displayName,
-                    email: currentUser.email,
-                };
-
-                try {
-                    await axios.post("http://localhost:5000/users", userInfo, {
-                        headers: { "Content-Type": "application/json" }
-                    });
-                    console.log("User saved successfully!");
-                    Navigate("/");
-                } catch (err) {
-                    if (err.response && err.response.status === 409) {
-                        console.warn("User already exists. No need to add again.");
-                    } else {
-                        console.error("Error saving user:", err);
-                    }
-                }
-            }
         });
-
         return () => unsubscribe();
     }, []);
+
 
     const authInfo = {
         createUser,

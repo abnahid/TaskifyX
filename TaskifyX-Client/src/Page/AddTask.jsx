@@ -26,7 +26,7 @@ const AddTaskForm = () => {
         console.log(newTask?.email);
 
         try {
-            axios.post('http://localhost:5000/tasks', newTask).then((res) => {
+            axios.post('https://taskify-x-server.vercel.app/tasks', newTask).then((res) => {
                 if (res.data.insertedId) {
                     Swal.fire({
                         title: "Task added successfully",

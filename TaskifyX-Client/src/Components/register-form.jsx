@@ -67,6 +67,7 @@ export function RegisterForm({ className, ...props }) {
         const userInfo = {
           email: result.user?.email,
           name: result.user?.displayName,
+          userId: result.user?.uid,
         };
         axiosPublic.post("/users", userInfo).then((res) => {
           navigate("/");
@@ -115,14 +116,21 @@ export function RegisterForm({ className, ...props }) {
           createUser(email, password)
             .then((userCredential) => {
               const user = userCredential.user;
+
+              // ✅ Ensure profile update happens before saving to DB
               updateUserProfile(name, photoUrl)
                 .then(() => {
-                  setUser(user);
-                  const userInfo = { name, email };
+                  setUser({ ...user, photoURL: photoUrl, displayName: name });
+                  const userInfo = {
+                    userId: user.uid,
+                    name: name,
+                    email: user.email
+                  };
 
-                  // Create the user in the backend
-                  axiosPublic
-                    .post("/users", userInfo)
+                  console.log("Saving User Info to DB:", userInfo);
+
+                  // ✅ Save user to database
+                  axiosPublic.post("/users", userInfo)
                     .then((res) => {
                       if (res.data.insertedId) {
                         Swal.fire({
@@ -141,6 +149,7 @@ export function RegisterForm({ className, ...props }) {
                     .catch((err) => {
                       toast.error(`Error creating user: ${err.message}`);
                     });
+
                 })
                 .catch((err) => {
                   toast.error(`Error updating profile: ${err.message}`);
@@ -150,6 +159,7 @@ export function RegisterForm({ className, ...props }) {
               toast.error(`Error creating user: ${err.message}`);
             });
         }
+
       });
   };
 

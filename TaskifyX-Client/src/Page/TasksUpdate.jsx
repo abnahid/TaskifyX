@@ -13,7 +13,7 @@ const TasksUpdate = () => {
 
     useEffect(() => {
         axios
-            .get(`http://localhost:5000/task/${id}`)
+            .get(`https://taskify-x-server.vercel.app/task/${id}`)
             .then((result) => {
                 const taskData = result.data;
                 setTitle(taskData.title || "");
@@ -33,7 +33,7 @@ const TasksUpdate = () => {
         };
 
         axios
-            .put(`http://localhost:5000/tasks/${id}`, updateData)
+            .put(`https://taskify-x-server.vercel.app/tasks/${id}`, updateData)
             .then(() => {
                 Swal.fire({
                     position: "center",
