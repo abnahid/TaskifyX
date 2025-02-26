@@ -103,7 +103,6 @@ export function RegisterForm({ className, ...props }) {
       return;
     }
 
-    // Check if the user already exists
     axiosPublic
       .get(`/users/${email}`)
       .then((res) => {
@@ -112,12 +111,10 @@ export function RegisterForm({ className, ...props }) {
       })
       .catch((error) => {
         if (error.response && error.response.status === 404) {
-          // Proceed only if user is not found (404)
           createUser(email, password)
             .then((userCredential) => {
               const user = userCredential.user;
 
-              // ✅ Ensure profile update happens before saving to DB
               updateUserProfile(name, photoUrl)
                 .then(() => {
                   setUser({ ...user, photoURL: photoUrl, displayName: name });
@@ -127,9 +124,7 @@ export function RegisterForm({ className, ...props }) {
                     email: user.email
                   };
 
-                  console.log("Saving User Info to DB:", userInfo);
 
-                  // ✅ Save user to database
                   axiosPublic.post("/users", userInfo)
                     .then((res) => {
                       if (res.data.insertedId) {

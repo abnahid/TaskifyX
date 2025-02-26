@@ -2,6 +2,7 @@ import { AuthContext } from "@/context/AuthProvider";
 import axios from "axios";
 import { useContext, useState } from "react";
 import { BiCalendar } from "react-icons/bi";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const AddTaskForm = () => {
@@ -10,6 +11,7 @@ const AddTaskForm = () => {
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("To-Do");
     const [dueDate, setDueDate] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -23,7 +25,6 @@ const AddTaskForm = () => {
             category,
             email: user?.email,
         };
-        console.log(newTask?.email);
 
         try {
             axios.post('https://taskify-x-server.vercel.app/tasks', newTask).then((res) => {
@@ -31,30 +32,27 @@ const AddTaskForm = () => {
                     Swal.fire({
                         title: "Task added successfully",
                         showClass: {
-                            popup: `
-                            animate__animated
-                            animate__fadeInUp
-                            animate__faster
-                          `,
+                            popup: `animate__animated animate__fadeInUp animate__faster`,
                         },
                         hideClass: {
-                            popup: `
-                            animate__animated
-                            animate__fadeOutDown
-                            animate__faster
-                          `,
+                            popup: `animate__animated animate__fadeOutDown animate__faster`,
                         },
+                    }).then(() => {
+
+                        navigate("/tasks");
                     });
 
                     setTitle("");
                     setDescription("");
                     setCategory("To-Do");
+                    setDueDate("");
                 }
             });
         } catch (err) {
             console.log(err);
         }
     };
+
 
     return (
         <div className="py-20 bg-gray-50 dark:bg-gray-900">
